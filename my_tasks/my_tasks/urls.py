@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from tasks_students_bank.views import page_not_found
+from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('tasks_students_bank.urls'))
 ]
+
+handler404 = page_not_found
+
