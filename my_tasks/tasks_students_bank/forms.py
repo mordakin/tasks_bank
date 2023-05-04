@@ -29,3 +29,16 @@ class LoginUserForm(AuthenticationForm):
         label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(
         label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+
+class FileForm(forms.ModelForm):
+    # title = forms.CharField(
+    #     label='Название', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    # subject = forms.ChoiceField(choices=SUBJECT_CHOICES,
+    #                             label='Предмет', widget=forms.Select(attrs={'class': 'form-select'}))
+    file = forms.FileField(
+        label='Прикрепите файл', widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = BankTasks
+        fields = ['file']

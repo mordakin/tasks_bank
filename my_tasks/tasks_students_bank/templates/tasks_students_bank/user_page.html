@@ -2,6 +2,33 @@
 
 {% block content %}
 <div class="container">
-
+<table class="table">
+    <thead>
+        <tr>
+            <th>Предмет</th>
+        </tr>
+    </thead>
+    <tbody>
+         {% for task in menu %}
+        <tr>
+            <td>
+                {% if task.1 == 'Математика' %}
+                    <a href="{% url 'math_page'%}">
+                        <button type="button" class="btn btn-primary">{{ task.1 }}</button>
+                    </a>
+                {% elif task.1 == 'Русский язык' %}
+                    <a href="{% url 'russian_language_page'%}">
+                        <button type="button" class="btn btn-primary">{{ task.1 }}</button>
+                    </a>
+                {% elif task.1 == 'Информатика' %}
+                    <a href="{% url 'user_page'%}">
+                        <button type="button" class="btn btn-primary">{{ task.1 }}</button>
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endblock %}

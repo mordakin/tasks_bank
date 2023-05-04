@@ -3,9 +3,10 @@ from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 
-from tasks_students_bank.forms import RegisterUserForm, LoginUserForm
+from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm
+from tasks_students_bank.models import BankTasks, SUBJECT_CHOICES
 
 
 def page_not_found(request, exception):
@@ -17,8 +18,66 @@ def index(request):
     return HttpResponse('Hello')
 
 
-def user_page(request):
-    return HttpResponse('user_page')
+class PostFile(CreateView):
+    form_class = FileForm
+    template_name = 'tasks_students_bank/lessons_post.html'
+    extra_context = {'title': 'Test'}
+    success_url = reverse_lazy('user_page')
+
+    def dispatch(self, request, *args, **kwargs):
+        self.subject = self.kwargs.get('subject')
+        self.lesson = self.kwargs.get('lesson')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['subject'] = self.subject
+        context['lesson'] = self.lesson
+        return context
+
+    def form_valid(self, form):
+        form.instance.account_user = self.request.user
+        form.instance.subject = self.kwargs['subject']
+        print(form.instance.subject)
+        form.instance.lesson = int(self.kwargs.get('lesson'))
+        return super().form_valid(form)
+
+
+class RussianLanguagePage(ListView):
+    model = BankTasks
+    template_name = 'tasks_students_bank/practical_page.html'
+    extra_context = {'title': 'Русский язык'}
+    context_object_name = 'subject'
+    success_url = reverse_lazy('user_page')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        practicals_links = []
+        for i in range(1, 13):
+            practicals_links.append(('/test/russian/' + str(i), 'Практическая работа ' + str(i)))
+        context['practicals_links'] = practicals_links
+        return context
+
+
+class UserPage(ListView):
+    model = BankTasks
+    template_name = 'tasks_students_bank/user_page.html'
+    extra_context = {'title': 'Страница пользователя'}
+    context_object_name = 'subject'
+    success_url = reverse_lazy('user_page')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["menu"] = SUBJECT_CHOICES
+        return context
+
+
+class LessonsPage(ListView):
+    model = BankTasks
+    template_name = 'tasks_students_bank/lessons_page.html'
+    extra_context = {'title': 'Выбор практики'}
+    context_object_name = 'form'
+    success_url = reverse_lazy('user_page')
 
 
 class SingInPage(CreateView):
@@ -40,6 +99,7 @@ class LoginPage(LoginView):
     form_class = LoginUserForm
     template_name = 'tasks_students_bank/login.html'
     extra_context = {'title': 'Авторизация'}
+    success_url = reverse_lazy('user_page')
 
     def get_success_url(self):
         """Ссылка перехода"""
@@ -49,6 +109,22 @@ class LoginPage(LoginView):
         """Вывод при неверном пароле"""
         form.add_error(None, "Неверный логин или пароль")
         return super().form_invalid(form)
+
+
+class MathPage(ListView):
+    model = BankTasks
+    template_name = 'tasks_students_bank/practical_page.html'
+    extra_context = {'title': 'Математика'}
+    context_object_name = 'subject'
+    success_url = reverse_lazy('user_page')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        practicals_links = []
+        for i in range(1, 13):
+            practicals_links.append(('/test/math/' + str(i), 'Практическая работа ' + str(i)))
+        context['practicals_links'] = practicals_links
+        return context
 
 
 def logout_user(request):
