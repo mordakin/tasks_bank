@@ -12,5 +12,28 @@
     <button type="submit" class="btn btn-primary">Загрузить работу</button>
     </div>
 </form>
+    <div class="mb-3">
+        <h1>Загруженные работы</h1>
+        {% for f in file_data %}
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Файл</th>
+                      <th scope="col" style="width: 500px">Время загрузки</th>
+                    </tr>
+                  </thead>
+                    <tbody>
+                        <tr>
+                          <td>{% if f.file %}
+                                    <a href="{{ f.file.url }}" download>{{ f.file.name }}</a>
+                              {% endif %}
+                          </td>
+                          <td>{{ f.time_create }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
+

@@ -1,8 +1,10 @@
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
 from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm
@@ -14,10 +16,7 @@ def page_not_found(request, exception):
     return HttpResponseNotFound('Такой страницы нет((')
 
 
-def index(request):
-    return HttpResponse('Hello')
-
-
+@method_decorator(login_required, name='dispatch')
 class PostFile(CreateView):
     form_class = FileForm
     template_name = 'tasks_students_bank/lessons_post.html'
@@ -33,6 +32,8 @@ class PostFile(CreateView):
         context = super().get_context_data(**kwargs)
         context['subject'] = self.subject
         context['lesson'] = self.lesson
+        user = BankTasks.objects.filter(account_user=self.request.user, subject=self.subject, lesson=self.lesson)
+        context['file_data'] = user
         return context
 
     def form_valid(self, form):
@@ -43,6 +44,7 @@ class PostFile(CreateView):
         return super().form_valid(form)
 
 
+@method_decorator(login_required, name='dispatch')
 class RussianLanguagePage(ListView):
     model = BankTasks
     template_name = 'tasks_students_bank/practical_page.html'
@@ -54,11 +56,29 @@ class RussianLanguagePage(ListView):
         context = super().get_context_data(**kwargs)
         practicals_links = []
         for i in range(1, 13):
-            practicals_links.append(('/test/russian/' + str(i), 'Практическая работа ' + str(i)))
+            practicals_links.append(('/test/rus/' + str(i), 'Практическая работа ' + str(i)))
         context['practicals_links'] = practicals_links
         return context
 
 
+@method_decorator(login_required, name='dispatch')
+class InfPage(ListView):
+    model = BankTasks
+    template_name = 'tasks_students_bank/practical_page.html'
+    extra_context = {'title': 'Информатика'}
+    context_object_name = 'subject'
+    success_url = reverse_lazy('user_page')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        practicals_links = []
+        for i in range(1, 13):
+            practicals_links.append(('/test/inform/' + str(i), 'Практическая работа ' + str(i)))
+        context['practicals_links'] = practicals_links
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
 class UserPage(ListView):
     model = BankTasks
     template_name = 'tasks_students_bank/user_page.html'
@@ -72,6 +92,7 @@ class UserPage(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class LessonsPage(ListView):
     model = BankTasks
     template_name = 'tasks_students_bank/lessons_page.html'
@@ -111,6 +132,7 @@ class LoginPage(LoginView):
         return super().form_invalid(form)
 
 
+@method_decorator(login_required, name='dispatch')
 class MathPage(ListView):
     model = BankTasks
     template_name = 'tasks_students_bank/practical_page.html'
