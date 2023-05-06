@@ -1,5 +1,5 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
-from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm
+from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm, SearchForm
 from tasks_students_bank.models import BankTasks, SUBJECT_CHOICES
 
 
@@ -32,8 +32,8 @@ class PostFile(CreateView):
         context = super().get_context_data(**kwargs)
         context['subject'] = self.subject
         context['lesson'] = self.lesson
-        user = BankTasks.objects.filter(account_user=self.request.user, subject=self.subject, lesson=self.lesson)
-        context['file_data'] = user
+        user_file = BankTasks.objects.filter(account_user=self.request.user, subject=self.subject, lesson=self.lesson)
+        context['file_data'] = user_file
         return context
 
     def form_valid(self, form):
@@ -92,15 +92,6 @@ class UserPage(ListView):
         return context
 
 
-@method_decorator(login_required, name='dispatch')
-class LessonsPage(ListView):
-    model = BankTasks
-    template_name = 'tasks_students_bank/lessons_page.html'
-    extra_context = {'title': 'Выбор практики'}
-    context_object_name = 'form'
-    success_url = reverse_lazy('user_page')
-
-
 class SingInPage(CreateView):
     """Страница регистрации"""
     form_class = RegisterUserForm
@@ -147,6 +138,38 @@ class MathPage(ListView):
             practicals_links.append(('/test/math/' + str(i), 'Практическая работа ' + str(i)))
         context['practicals_links'] = practicals_links
         return context
+
+
+def is_staff(user):
+    return user.is_staff
+
+
+@method_decorator(user_passes_test(is_staff), name='dispatch')
+class TeacherPage(ListView):
+    model = BankTasks
+    template_name = 'tasks_students_bank/search.html'
+    extra_context = {'title': 'Поиск'}
+    form_class = SearchForm
+    success_url = reverse_lazy('user_page')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.GET:  # Проверяем, есть ли GET параметры
+            context['form'] = SearchForm(self.request.GET)
+        else:
+            context['form'] = SearchForm()
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        form = self.form_class(self.request.GET)
+        if form.is_valid():
+            subject = form.cleaned_data['subject']
+            lesson = form.cleaned_data['lesson']
+            queryset = queryset.filter(subject=subject, lesson=lesson)
+        else:
+            queryset = queryset.none()
+        return queryset.select_related('account_user')
 
 
 def logout_user(request):

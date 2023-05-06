@@ -1,0 +1,41 @@
+{% extends 'tasks_students_bank/base.html' %}
+
+{% block content %}
+<div class="container">
+<form method="get">
+    <div class="mb-3">
+    {% csrf_token %}
+        {% for f in form %}
+        <p><label class="form-label" for="{{ f.id_for_label }}">{{f.label}}</label>{{f}} </p>
+        <div class="form-error">{{f.errors}}</div>
+        {% endfor %}
+    <button type="submit" class="btn btn-primary">Поиск</button>
+    </div>
+</form>
+     <hr>
+  <table class="table">
+    <thead>
+      <tr>
+          <th>Ученик</th>
+        <th>Файл</th>
+        <th>Время загрузки</th>
+        <th>Предмет</th>
+        <th>Урок</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in object_list %}
+        <tr>
+            <td>{{ task.account_user.fio }}</td>
+          <td><a href="{{ task.file.url }}" download>{{ task.file.name }}</a></td>
+          <td>{{ task.time_create }}</td>
+          <td>{{ task.get_subject_display }}</td>
+          <td>{{ task.lesson }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Нет данных</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
