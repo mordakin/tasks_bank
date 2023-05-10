@@ -19,7 +19,9 @@
                   <thead>
                     <tr>
                       <th scope="col">Файл</th>
-                      <th scope="col" style="width: 500px">Время загрузки</th>
+                      <th scope="col" style="width: 200px">Предмет</th>
+                      <th scope="col" style="width: 200px">Практика</th>
+                      <th scope="col" style="width: 400px">Время загрузки</th>
                     </tr>
                   </thead>
                     <tbody>
@@ -28,6 +30,14 @@
                                     <a href="{{ f.file.url }}" download>{{ f.file.name }}</a>
                               {% endif %}
                           </td>
+                            {% if f.subject.subject_name == 'math' %}
+                            <td> Математика </td>
+                            {% elif f.subject.subject_name == 'rus' %}
+                            <td> Русский </td>
+                            {% elif f.subject.subject_name == 'inform' %}
+                            <td> Информатика </td>
+                            {% endif %}
+                            <td>{{ f.lesson.lesson_number }}</td>
                           <td>{{ f.time_create }}</td>
                         </tr>
                     </tbody>

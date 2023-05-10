@@ -7,8 +7,8 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
-from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm, SearchForm
-from tasks_students_bank.models import BankTasks, SUBJECT_CHOICES
+from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm, SearchForm, SUBJECT_CHOICES
+from tasks_students_bank.models import BankTasks, Lessons, Subjects
 
 
 def page_not_found(request, exception):
@@ -24,23 +24,25 @@ class PostFile(CreateView):
     success_url = reverse_lazy('user_page')
 
     def dispatch(self, request, *args, **kwargs):
-        self.subject = self.kwargs.get('subject')
-        self.lesson = self.kwargs.get('lesson')
+        self.subject_name = self.kwargs.get('subject')
+        self.lesson_number = self.kwargs.get('lesson')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['subject'] = self.subject
-        context['lesson'] = self.lesson
-        user_file = BankTasks.objects.filter(account_user=self.request.user, subject=self.subject, lesson=self.lesson)
-        context['file_data'] = user_file
+        context['subject'] = self.subject_name
+        context['lesson'] = self.lesson_number
+        user_name = BankTasks.objects.filter(account_user=self.request.user, subject__subject_name=self.subject_name,
+                                             lesson__lesson_number=self.lesson_number)
+        context['file_data'] = user_name
         return context
 
     def form_valid(self, form):
         form.instance.account_user = self.request.user
-        form.instance.subject = self.kwargs['subject']
-        print(form.instance.subject)
-        form.instance.lesson = int(self.kwargs.get('lesson'))
+        subject_instance = Subjects.objects.get(subject_name=self.subject_name)
+        form.instance.subject_id = subject_instance.id
+        lesson_instance = Lessons.objects.get(lesson_number=self.lesson_number)
+        form.instance.lesson_id = lesson_instance.id
         return super().form_valid(form)
 
 

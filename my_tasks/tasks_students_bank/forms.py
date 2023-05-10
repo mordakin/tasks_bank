@@ -13,6 +13,8 @@ class RegisterUserForm(UserCreationForm):
         label='Номер студенческого', widget=forms.TextInput(attrs={'class': 'form-control'}))
     fio = forms.CharField(label='ФИО', max_length=255, widget=forms.TextInput(
         attrs={'class': 'form-control'}))
+    group_name = forms.CharField(label='Номер группы', max_length=255, widget=forms.TextInput(
+        attrs={'class': 'form-control'}))
     password1 = forms.CharField(label='Пароль', max_length=255,
                                 widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Повторение пароля', max_length=255,
@@ -21,7 +23,7 @@ class RegisterUserForm(UserCreationForm):
     class Meta:
         model = UserData
         fields = ['username', 'personal_number',
-                  'fio', 'password1', 'password2']
+                  'fio', 'group_name', 'password1', 'password2']
 
 
 class LoginUserForm(AuthenticationForm):
@@ -40,8 +42,14 @@ class FileForm(forms.ModelForm):
         fields = ['file']
 
 
+SUBJECT_CHOICES = [
+    ('math', 'Математика'),
+    ('rus', 'Русский язык'),
+    ('inform', 'Информатика'),
+]
+
+
 class SearchForm(forms.Form):
     subject = forms.ChoiceField(choices=SUBJECT_CHOICES,
                                 label='Предмет', widget=forms.Select(attrs={'class': 'form-select'}))
     lesson = forms.IntegerField(label='Урок', widget=forms.NumberInput(attrs={'class': 'form-control'}))
-
