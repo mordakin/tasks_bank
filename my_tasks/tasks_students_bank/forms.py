@@ -50,6 +50,9 @@ SUBJECT_CHOICES = [
 
 
 class SearchForm(forms.Form):
-    subject = forms.ChoiceField(choices=SUBJECT_CHOICES,
-                                label='Предмет', widget=forms.Select(attrs={'class': 'form-select'}))
-    lesson = forms.IntegerField(label='Урок', widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    subject = forms.ModelChoiceField(queryset=Subjects.objects.all(),
+                                     label='Предмет', widget=forms.Select(attrs={'class': 'form-select'}))
+    lesson = forms.ModelChoiceField(label='Урок', widget=forms.Select(attrs={'class': 'form-control'}),
+                                    queryset=Lessons.objects.all())
+    group = forms.ModelChoiceField(label='Группа', widget=forms.Select(attrs={'class': 'form-control'}),
+                                   queryset=Groups.objects.all())

@@ -34,6 +34,7 @@ class PostFile(CreateView):
         context['lesson'] = self.lesson_number
         user_name = BankTasks.objects.filter(account_user=self.request.user, subject__subject_name=self.subject_name,
                                              lesson__lesson_number=self.lesson_number)
+
         context['file_data'] = user_name
         return context
 
@@ -57,8 +58,8 @@ class RussianLanguagePage(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         practicals_links = []
-        for i in range(1, 13):
-            practicals_links.append(('/test/rus/' + str(i), 'Практическая работа ' + str(i)))
+        for i in range(1, Lessons.objects.count() + 1):
+            practicals_links.append(('/Русский/' + str(i), 'Практическая работа ' + str(i)))
         context['practicals_links'] = practicals_links
         return context
 
@@ -74,8 +75,8 @@ class InfPage(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         practicals_links = []
-        for i in range(1, 13):
-            practicals_links.append(('/test/inform/' + str(i), 'Практическая работа ' + str(i)))
+        for i in range(1, Lessons.objects.count() + 1):
+            practicals_links.append(('/Информатика/' + str(i), 'Практическая работа ' + str(i)))
         context['practicals_links'] = practicals_links
         return context
 
@@ -90,7 +91,7 @@ class UserPage(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["menu"] = SUBJECT_CHOICES
+        context["menu"] = Subjects.objects.all()
         return context
 
 
@@ -136,8 +137,8 @@ class MathPage(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         practicals_links = []
-        for i in range(1, 13):
-            practicals_links.append(('/test/math/' + str(i), 'Практическая работа ' + str(i)))
+        for i in range(1, Lessons.objects.count() + 1):
+            practicals_links.append(('/Математика/' + str(i), 'Практическая работа ' + str(i)))
         context['practicals_links'] = practicals_links
         return context
 
@@ -168,13 +169,55 @@ class TeacherPage(ListView):
         if form.is_valid():
             subject = form.cleaned_data['subject']
             lesson = form.cleaned_data['lesson']
-            queryset = queryset.filter(subject=subject, lesson=lesson)
+            group = form.cleaned_data['group']
+            queryset = queryset.filter(subject__subject_name=subject, lesson__lesson_number=lesson.lesson_number,
+                                       account_user__group__group_name=group)
         else:
             queryset = queryset.none()
         return queryset.select_related('account_user')
+
+
+@method_decorator(user_passes_test(is_staff), name='dispatch')
+class AddLesson(CreateView):
+    model = Lessons
+    success_url = reverse_lazy('user_page')
+    fields = []
+
+    def form_valid(self, form):
+        new_lesson_number = Lessons.objects.count() + 1
+        form.instance.lesson_number = new_lesson_number
+        return super().form_valid(form)
 
 
 def logout_user(request):
     """Выход из аккаунта"""
     logout(request)
     return redirect('login')
+
+
+# @method_decorator(user_passes_test(is_staff), name='dispatch')
+# class AddSubject(CreateView):
+#     model = Subjects
+#     success_url = reverse_lazy('user_page')
+#     fields = []
+#
+#     def form_valid(self, form):
+#         # new_lesson_number = Lessons.objects.count() + 1
+#         # form.instance.lesson_number = new_lesson_number
+#         return super().form_valid(form)
+
+
+# class SubjectPage(ListView):
+#     model = Subjects
+#     template_name = 'tasks_students_bank/subject_page.html'
+#     extra_context = {'title': 'Математика'}
+#     context_object_name = 'subject'
+#     success_url = reverse_lazy('user_page')
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         practicals_links = []
+#         for i in range(1, Lessons.objects.count() + 1):
+#             practicals_links.append(('/Математика/' + str(i), 'Практическая работа ' + str(i)))
+#         context['practicals_links'] = practicals_links
+#         return context

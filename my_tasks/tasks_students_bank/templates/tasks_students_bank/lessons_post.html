@@ -15,30 +15,24 @@
     <div class="mb-3">
         <h1>Загруженные работы</h1>
         {% for f in file_data %}
-                <table class="table">
+                <table class="table" style="table-layout: fixed;" >
                   <thead>
                     <tr>
-                      <th scope="col">Файл</th>
+                      <th scope="col" style="width: 500px">Файл</th>
                       <th scope="col" style="width: 200px">Предмет</th>
                       <th scope="col" style="width: 200px">Практика</th>
-                      <th scope="col" style="width: 400px">Время загрузки</th>
+                      <th scope="col" style="width: 200px">Время загрузки</th>
                     </tr>
                   </thead>
                     <tbody>
                         <tr>
-                          <td>{% if f.file %}
+                          <td style="word-wrap: break-word; white-space: normal;">{% if f.file %}
                                     <a href="{{ f.file.url }}" download>{{ f.file.name }}</a>
                               {% endif %}
                           </td>
-                            {% if f.subject.subject_name == 'math' %}
-                            <td> Математика </td>
-                            {% elif f.subject.subject_name == 'rus' %}
-                            <td> Русский </td>
-                            {% elif f.subject.subject_name == 'inform' %}
-                            <td> Информатика </td>
-                            {% endif %}
-                            <td>{{ f.lesson.lesson_number }}</td>
-                          <td>{{ f.time_create }}</td>
+                            <td style="word-wrap: break-word; white-space: normal;">{{ subject }}</td>
+                            <td style="word-wrap: break-word; white-space: normal;">{{ lesson }}</td>
+                          <td style="word-wrap: break-word; white-space: normal;">{{ f.time_create }}</td>
                         </tr>
                     </tbody>
                 </table>

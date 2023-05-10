@@ -12,17 +12,17 @@
          {% for task in menu %}
         <tr>
             <td>
-                {% if task.1 == 'Математика' %}
+                {% if task.subject_name  == 'Математика' %}
                     <a href="{% url 'math_page'%}">
-                        <button type="button" class="btn btn-primary">{{ task.1 }}</button>
+                        <button type="button" class="btn btn-primary">{{ task.subject_name }}</button>
                     </a>
-                {% elif task.1 == 'Русский язык' %}
+                {% elif task.subject_name == 'Русский' %}
                     <a href="{% url 'russian_language_page'%}">
-                        <button type="button" class="btn btn-primary">{{ task.1 }}</button>
+                        <button type="button" class="btn btn-primary">{{ task.subject_name }}</button>
                     </a>
-                {% elif task.1 == 'Информатика' %}
+                {% elif task.subject_name == 'Информатика' %}
                     <a href="{% url 'inf_page'%}">
-                        <button type="button" class="btn btn-primary">{{ task.1 }}</button>
+                        <button type="button" class="btn btn-primary">{{ task.subject_name }}</button>
                     </a>
                 {% endif %}
             </td>
