@@ -1,9 +1,9 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
-from django.http import HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseNotFound, HttpResponse, Http404
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
@@ -83,15 +83,17 @@ class InfPage(ListView):
 
 @method_decorator(login_required, name='dispatch')
 class UserPage(ListView):
-    model = BankTasks
+    model = Subjects
     template_name = 'tasks_students_bank/user_page.html'
     extra_context = {'title': 'Страница пользователя'}
-    context_object_name = 'subject'
+    context_object_name = 'subjects'
     success_url = reverse_lazy('user_page')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["menu"] = Subjects.objects.all()
+        subjects = Subjects.objects.all()
+        button_urls = [reverse('subject_page', kwargs={'subject_page': subject.subject_name}) for subject in subjects]
+        context['subject_button_pairs'] = zip(subjects, button_urls)
         return context
 
 
@@ -207,17 +209,17 @@ def logout_user(request):
 #         return super().form_valid(form)
 
 
-# class SubjectPage(ListView):
-#     model = Subjects
-#     template_name = 'tasks_students_bank/subject_page.html'
-#     extra_context = {'title': 'Математика'}
-#     context_object_name = 'subject'
-#     success_url = reverse_lazy('user_page')
-#
-#     def get_context_data(self, *, object_list=None, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         practicals_links = []
-#         for i in range(1, Lessons.objects.count() + 1):
-#             practicals_links.append(('/Математика/' + str(i), 'Практическая работа ' + str(i)))
-#         context['practicals_links'] = practicals_links
-#         return context
+class SubjectPage(ListView):
+    model = Subjects
+    template_name = 'tasks_students_bank/subject_page.html'
+    context_object_name = 'subject'
+    success_url = reverse_lazy('user_page')
+
+    def dispatch(self, request, *args, **kwargs):
+        subject_page = self.kwargs['subject_page']
+        if not Subjects.objects.filter(subject_name=subject_page).exists():
+            raise Http404("Такой страницы не найдено")
+        return super().dispatch(request, *args, **kwargs)
+
+    # def get_context_data(self, *, object_list=None, **kwargs):
+    #     context = super().get_context_data(**kwargs)
