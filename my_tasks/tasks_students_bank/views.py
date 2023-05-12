@@ -7,7 +7,8 @@ from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
-from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm, SearchForm, SUBJECT_CHOICES
+from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm, SearchForm, \
+    AddSubjectForm
 from tasks_students_bank.models import BankTasks, Lessons, Subjects
 
 
@@ -45,40 +46,6 @@ class PostFile(CreateView):
         lesson_instance = Lessons.objects.get(lesson_number=self.lesson_number)
         form.instance.lesson_id = lesson_instance.id
         return super().form_valid(form)
-
-
-@method_decorator(login_required, name='dispatch')
-class RussianLanguagePage(ListView):
-    model = BankTasks
-    template_name = 'tasks_students_bank/practical_page.html'
-    extra_context = {'title': 'Русский язык'}
-    context_object_name = 'subject'
-    success_url = reverse_lazy('user_page')
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        practicals_links = []
-        for i in range(1, Lessons.objects.count() + 1):
-            practicals_links.append(('/Русский/' + str(i), 'Практическая работа ' + str(i)))
-        context['practicals_links'] = practicals_links
-        return context
-
-
-@method_decorator(login_required, name='dispatch')
-class InfPage(ListView):
-    model = BankTasks
-    template_name = 'tasks_students_bank/practical_page.html'
-    extra_context = {'title': 'Информатика'}
-    context_object_name = 'subject'
-    success_url = reverse_lazy('user_page')
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        practicals_links = []
-        for i in range(1, Lessons.objects.count() + 1):
-            practicals_links.append(('/Информатика/' + str(i), 'Практическая работа ' + str(i)))
-        context['practicals_links'] = practicals_links
-        return context
 
 
 @method_decorator(login_required, name='dispatch')
@@ -126,23 +93,6 @@ class LoginPage(LoginView):
         """Вывод при неверном пароле"""
         form.add_error(None, "Неверный логин или пароль")
         return super().form_invalid(form)
-
-
-@method_decorator(login_required, name='dispatch')
-class MathPage(ListView):
-    model = BankTasks
-    template_name = 'tasks_students_bank/practical_page.html'
-    extra_context = {'title': 'Математика'}
-    context_object_name = 'subject'
-    success_url = reverse_lazy('user_page')
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        practicals_links = []
-        for i in range(1, Lessons.objects.count() + 1):
-            practicals_links.append(('/Математика/' + str(i), 'Практическая работа ' + str(i)))
-        context['practicals_links'] = practicals_links
-        return context
 
 
 def is_staff(user):
@@ -197,18 +147,14 @@ def logout_user(request):
     return redirect('login')
 
 
-# @method_decorator(user_passes_test(is_staff), name='dispatch')
-# class AddSubject(CreateView):
-#     model = Subjects
-#     success_url = reverse_lazy('user_page')
-#     fields = []
-#
-#     def form_valid(self, form):
-#         # new_lesson_number = Lessons.objects.count() + 1
-#         # form.instance.lesson_number = new_lesson_number
-#         return super().form_valid(form)
+@method_decorator(user_passes_test(is_staff), name='dispatch')
+class AddSubject(CreateView):
+    form_class = AddSubjectForm
+    template_name = 'tasks_students_bank/create_subject.html'
+    success_url = reverse_lazy('user_page')
 
 
+@method_decorator(login_required, name='dispatch')
 class SubjectPage(ListView):
     model = Subjects
     template_name = 'tasks_students_bank/subject_page.html'
@@ -221,5 +167,12 @@ class SubjectPage(ListView):
             raise Http404("Такой страницы не найдено")
         return super().dispatch(request, *args, **kwargs)
 
-    # def get_context_data(self, *, object_list=None, **kwargs):
-    #     context = super().get_context_data(**kwargs)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        subject_page = self.kwargs['subject_page']
+        practicals_links = []
+        for i in range(1, Lessons.objects.count() + 1):
+            practicals_links.append(('/' + subject_page + '/' + str(i), 'Практическая работа ' + str(i)))
+        context['practicals_links'] = practicals_links
+        context['title'] = subject_page
+        return context

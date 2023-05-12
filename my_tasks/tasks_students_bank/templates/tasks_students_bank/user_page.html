@@ -17,5 +17,11 @@
             <button type="button" class="btn btn-primary">{{ subject.subject_name }}</button>
         </a>
         {% endfor %}
+    <p></p>
+    {% if request.user.is_authenticated and request.user.is_staff%}
+    <a href="{% url 'create_subject' %}">
+        <button type="submit" class="btn btn-warning">Добавить практику</button>
+    </a>
+    {% endif %}
 </div>
 {% endblock %}

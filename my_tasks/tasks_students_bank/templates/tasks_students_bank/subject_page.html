@@ -2,19 +2,28 @@
 
 {% block content %}
 <div class="container">
-<table class="table">
-    <thead>
+    <table class="table">
+        <thead>
         <tr>
-            <th>Предмет</th>
+            <th>Практика</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
+        {% for link in practicals_links %}
         <tr>
             <td>
-               ф
+                <li><a href="{{ link.0 }}">{{ link.1 }}</a></li>
             </td>
         </tr>
-    </tbody>
-</table>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if request.user.is_authenticated and request.user.is_staff%}
+    <form method="post" action="{% url 'create_lesson' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Добавить практику</button>
+    </form>
+    {% endif %}
+
 </div>
 {% endblock %}
