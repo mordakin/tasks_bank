@@ -9,7 +9,7 @@ from django.views.generic import CreateView, ListView
 
 from tasks_students_bank.forms import RegisterUserForm, LoginUserForm, FileForm, SearchForm, \
     AddSubjectForm
-from tasks_students_bank.models import BankTasks, Lessons, Subjects
+from tasks_students_bank.models import BankTasks, Lessons, Subjects, Groups
 
 
 def page_not_found(request, exception):
@@ -73,7 +73,11 @@ class SingInPage(CreateView):
 
     def form_valid(self, form):
         """Внос данных в бд"""
-        user = form.save()
+        user = form.save(commit=False)
+        group_name = form.cleaned_data['group_name']
+        group = Groups.objects.get(group_name=group_name)
+        user.group = group
+        user.save()
         login(self.request, user)
         return redirect('user_page')
 
