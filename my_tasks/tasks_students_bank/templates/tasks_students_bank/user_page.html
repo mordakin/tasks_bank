@@ -1,0 +1,27 @@
+{% extends 'tasks_students_bank/base.html' %}
+
+{% block content %}
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Предмет</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    {% for subject, button_url in subject_button_pairs %}
+        <p></p>
+        <a href="{{ button_url }}">
+            <button type="button" class="btn btn-primary">{{ subject.subject_name }}</button>
+        </a>
+        {% endfor %}
+    <p></p>
+    {% if request.user.is_authenticated and request.user.is_staff%}
+    <a href="{% url 'create_subject' %}">
+        <button type="submit" class="btn btn-warning">Добавить практику</button>
+    </a>
+    {% endif %}
+</div>
+{% endblock %}

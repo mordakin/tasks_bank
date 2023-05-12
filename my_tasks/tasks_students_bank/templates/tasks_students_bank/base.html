@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    {% load static %}
+    <link href="{% static 'tasks_students_bank/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'tasks_students_bank/bootstrap/js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <div class="col-md-3 mb-2 mb-md-0 fs-4">
+
+
+        </div>
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            {% if request.user.is_authenticated and request.user.is_staff%}
+            <li><a href="{% url 'user_page' %}" class="nav-link px-2 link-secondary">Предметы</a></li>
+            <li><a href="{% url 'search' %}" class="nav-link px-2 link-secondary">Поиск</a></li>
+            {% elif request.user.is_authenticated %}
+            <li><a href="{% url 'user_page' %}" class="nav-link px-2 link-secondary">Предметы</a></li>
+            {% else %}
+            <li><a href="{% url 'login' %}" class="nav-link px-2 link-secondary">Главная страница</a></li>
+            {% endif %}
+        </ul>
+
+        <div class="col-md-3 text-end">
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'user_page' %}">
+                <button type="button" class="btn btn-outline-primary me-2">{{ user.username }}</button>
+            </a>
+            <a href="{% url 'logout' %}">
+                <button type="button" class="btn btn-primary">Выйти</button>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}">
+                <button type="button" class="btn btn-outline-primary me-2">Вход</button>
+            </a>
+            <a href="{% url 'sing_in' %}">
+                <button type="button" class="btn btn-primary">Регистрация</button>
+            </a>
+            {% endif %}
+        </div>
+    </header>
+</div>
+{% block content %}
+{% endblock %}
+</body>
+</html>
+
+
