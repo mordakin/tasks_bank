@@ -22,7 +22,6 @@ class PostFile(CreateView):
     form_class = FileForm
     template_name = 'tasks_students_bank/lessons_post.html'
     extra_context = {'title': 'Test'}
-    success_url = reverse_lazy('user_page')
 
     def dispatch(self, request, *args, **kwargs):
         self.subject_name = self.kwargs.get('subject')
@@ -38,6 +37,11 @@ class PostFile(CreateView):
 
         context['file_data'] = user_name
         return context
+
+    def get_success_url(self):
+        subject_name = self.subject_name
+        lesson_number = self.lesson_number
+        return reverse_lazy('test', kwargs={'subject': subject_name, 'lesson': lesson_number})
 
     def form_valid(self, form):
         form.instance.account_user = self.request.user
